@@ -1,0 +1,22 @@
+{
+  "root": "apps/favorites-service",
+  "sourceRoot": "apps/favorites-service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:build",
+      "options": {
+        "outputPath": "dist/apps/favorites-service",
+        "main": "apps/favorites-service/src/main.ts",
+        "tsConfig": "apps/favorites-service/tsconfig.app.json",
+        "assets": ["apps/favorites-service/src/assets"]
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:execute",
+      "options": {
+        "buildTarget": "favorites-service:build"
+      }
+    }
+  }
+}

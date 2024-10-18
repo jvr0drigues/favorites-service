@@ -1,31 +1,32 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FavoritesController } from './app.controller';
 import { FavoritesService } from './app.service';
 import { Favorite } from './entities/favorite.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-describe('FavoritesController', () => {
-  let controller: FavoritesController;
+const mockFavoriteRepository = () => ({
+  save: jest.fn(),
+  find: jest.fn(),
+  create: jest.fn(),
+});
+
+describe('FavoritesService', () => {
   let service: FavoritesService;
+  let repository: Repository<Favorite>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [FavoritesController],
       providers: [
+        FavoritesService,
         {
-          provide: FavoritesService,
-          useValue: {
-            addFavorite: jest.fn(),
-          },
+          provide: getRepositoryToken(Favorite),
+          useFactory: mockFavoriteRepository,
         },
       ],
     }).compile();
 
-    controller = module.get<FavoritesController>(FavoritesController);
     service = module.get<FavoritesService>(FavoritesService);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    repository = module.get<Repository<Favorite>>(getRepositoryToken(Favorite));
   });
 
   describe('addFavorite', () => {
@@ -39,13 +40,11 @@ describe('FavoritesController', () => {
         createdAt: undefined,
       };
 
-      jest.spyOn(service, 'addFavorite').mockResolvedValue(favorite);
-      const result = await controller.addFavorite(userId, asteroidId);
-      expect(result).toEqual({
-        id: 'favorite-uuid',
-        userId: favorite.userId,
-        asteroidId: favorite.asteroidId,
-      });
+      jest.spyOn(repository, 'save').mockResolvedValue(favorite);
+
+      const result = await service.addFavorite(userId, asteroidId);
+
+      expect(result).toEqual(favorite);
     });
   });
 });
